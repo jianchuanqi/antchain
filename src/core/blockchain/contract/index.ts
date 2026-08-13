@@ -51,7 +51,7 @@ export class BlockchainContract {
 
       const url = `${this.config.restUrl}${blockChainEndpoint.contract.chainCallForBiz}`;
 
-      const requestBody: Record<string, any> = {
+      const requestBody: Record<string, unknown> = {
         accessId: this.config.accessId,
         bizid: this.config.bizId,
         account: this.config.account,
@@ -60,7 +60,7 @@ export class BlockchainContract {
         isLocalTransaction: params.isLocalTransaction,
         method: 'CALLWASMCONTRACTASYNC',
         token,
-        orderId: generateUUID(),
+        orderId: params.orderId || generateUUID(),
         timestamp: new Date().toISOString(),
         mykmsKeyId: this.config.kmsKeyId,
         inputParamListStr: params.inputParamListStr,
@@ -267,4 +267,4 @@ export class BlockchainContract {
       };
     }
   }
-} 
+}

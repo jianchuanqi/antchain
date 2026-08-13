@@ -1,9 +1,7 @@
 import { ApiResponse } from 'src/deps.ts';
 import { 
   defaultHeaders, 
-  generateUUID, 
-  sendRequest, 
-  parseResponse 
+  generateUUID
 } from '../base.ts';
 import { BlockchainConfig, defaultConfig, blockChainEndpoint } from 'src/config/blockchain.ts';
 import { BlockchainAuth } from '../auth/index.ts';
@@ -241,6 +239,17 @@ export class BlockchainData {
     }
   }
   async queryReceipt(dataId: string,token?: string): Promise<ApiResponse> {
+    if (!token) {
+      const authToken = await this.auth.getToken();
+      if (!authToken) {
+        return {
+          success: false,
+          message: 'Authentication failed',
+          code: 'AUTH_ERROR'
+        };
+      }
+      token = authToken;
+    }
     const url = `${this.config.restUrl}${blockChainEndpoint.contract.chainCallForBiz}`;
     const requestBody = {
       'accessId': this.config.accessId,

@@ -53,6 +53,37 @@ deno run -A src/examples/contract-example.ts
 For more details about writing and deploying contracts, please visit project
 [myfish-contract](https://github.com/Biaoo/myfish-contract)
 
+## Eco-label contract suite
+
+`contracts/eco-label/` now uses one primary Myfish/AssemblyScript WASM contract,
+`R2026001EDDLEcoLabelRegistryUnifiedV2`. Rule governance and label lifecycle
+share one storage boundary, so issuance checks the active rule atomically.
+The previous two-contract CompatV2 implementation remains available only for
+historical evidence and regression. The suite includes
+compiler-generated ABI/WASC artifacts, a frozen conformance oracle, a
+deterministic in-memory simulator, strict final-receipt mapping tests, and an
+accuracy-report generator.
+
+The unified Myfish V2 contract is deployed on the research chain. Deployment,
+initialization, rule registration, activation, and one synthetic label issue
+are included in blocks 15347301–15347307; the label/task read-backs match and a
+later-block recheck passed. The recorded assurance is
+`RESEARCH_STATE_CONFIRMED` because the gateway still returns
+`txFinish=false/txSuccess=false`. Historical CompatV2 evidence remains
+read-only; new deployments use the unified contract and create no rule mirror.
+
+```bash
+./contracts/eco-label/build-contracts.sh
+npx --yes deno test --allow-read --allow-net --allow-env \
+  src/eco/contracts/contract_suite_test.ts \
+  src/eco/adapters/antchain_test.ts
+```
+
+See
+[the contract interface and deployment gates](contracts/eco-label/interface.md),
+[the Chinese contract guide](contracts/eco-label/README.md), and
+[the accuracy report](docs/eco-label-contract-accuracy-report.md).
+
 ## Start Server
 
 ```bash
@@ -61,5 +92,6 @@ deno run -A src/server.ts
 
 ## Web frontend
 
-The dashboard is a Vite application in `web/`. Build it with `deno task web`
-(or `deno task build`); run its independent Sites checks with `pnpm --dir web test:sites`.
+The dashboard is a Vite application in `web/`. Build it with `deno task web` (or
+`deno task build`); run its independent Sites checks with
+`pnpm --dir web test:sites`.

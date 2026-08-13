@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "eddl-chain-algorithm-release/v1",
+  "projectId": "R-2026-001-WP01-eco-design-labelling",
+  "schemeId": "eco-design-digital-identifier",
+  "algorithmId": "ECO-IND-FINAL-20260729",
+  "version": "1.0.0",
+  "algorithmHash": "sha256:825eed2a806a4fd3b40509594c73df2d0f53909483c017edbea5a1aa323c86e3",
+  "sourceArtifactDigest": "sha256:bce8bb2e60864a2200f3ab3db5055bfa39e34d697363aad227d131203d4aabf9",
+  "evaluatorHash": "sha256:5583d1e886d390e799af6d45a7fc0c2a49615002a4d5c5c1032c38d6c8c21938",
+  "evaluatorHashSource": "signedTemplateBundle.payload.evaluator.artifactDigest",
+  "evaluatorDescriptorDigest": "sha256:64c4d7f9628bd4417e4f01a2de2d1ff0abe6f0b9b4c76941e0d0eeefec12652b",
+  "evaluatorArtifactStatus": "UNPUBLISHED",
+  "formalIssuanceAllowed": false,
+  "generatedFrom": {
+    "ruleSource": "data/rules/ECO-IND-FINAL-20260729.json",
+    "bundlePublisher": "src/lib/template-bundles.js"
+  }
+}

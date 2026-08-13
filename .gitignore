@@ -1,6 +1,14 @@
 .DS_Store
 node_modules
 dist
+!contracts/eco-label/algorithm-registry/dist/
+contracts/eco-label/algorithm-registry/dist/*
+!contracts/eco-label/algorithm-registry/dist/index.abi
+!contracts/eco-label/algorithm-registry/dist/index.wasc
+!contracts/eco-label/eco-label-registry/dist/
+contracts/eco-label/eco-label-registry/dist/*
+!contracts/eco-label/eco-label-registry/dist/index.abi
+!contracts/eco-label/eco-label-registry/dist/index.wasc
 .codex-local
 
 *.key

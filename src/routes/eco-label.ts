@@ -166,6 +166,17 @@ export function createEcoLabelRouter(
       return fail(c, error);
     }
   });
+  router.post("/labels/:labelId/reconcile", async (c) => {
+    try {
+      requireRole(await viewer(c.req.raw, true), ["evaluator", "admin"]);
+      return c.json({
+        success: true,
+        data: await service.reconcileLabelLedger(c.req.param("labelId")),
+      });
+    } catch (error) {
+      return fail(c, error);
+    }
+  });
   router.get("/labels/:labelId", async (c) => {
     try {
       return c.json({
@@ -220,14 +231,14 @@ export function createEcoVerificationPage(service: EcoLabelService) {
         ? "本地演示记录（非真实上链）"
         : data.ledger.status === "PENDING"
         ? "链上提交待确认"
+        : data.ledger.status === "FAILED"
+        ? "链上执行失败"
         : "链上存证已确认";
       const html =
         `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>生态设计数字标识验证</title><style>body{font:16px system-ui;max-width:760px;margin:32px auto;padding:0 16px;color:#15332b}main{border:1px solid #cddbd5;border-radius:12px;padding:24px}dt{font-weight:700}dd{margin:4px 0 16px;word-break:break-all}.ok{color:#176b45}</style></head><body><main><h1>生态设计数字标识</h1><p class="ok">当前状态：${
           escapeHtml(data.status)
         }</p><dl><dt>产品</dt><dd>${
           escapeHtml(data.productName)
-        }</dd><dt>等级 / 分数</dt><dd>${escapeHtml(data.level)} / ${
-          escapeHtml(data.score)
         }</dd><dt>算法版本</dt><dd>${escapeHtml(data.algorithm.name)} · ${
           escapeHtml(data.algorithm.version)
         }</dd><dt>沙箱证明</dt><dd>${escapeHtml(data.sandbox.sandboxType)} · ${

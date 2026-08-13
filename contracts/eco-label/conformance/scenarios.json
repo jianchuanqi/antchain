@@ -1,0 +1,253 @@
+{
+  "suiteId": "eco-design-label-contract-suite/v1",
+  "oracleVersion": "2026-08-11",
+  "accuracyThresholdPercent": 95,
+  "securityInvariantTargetPercent": 100,
+  "scenarios": [
+    {
+      "id": "ALG-001",
+      "operation": "unauthorized-register",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "UNAUTHORIZED",
+      "securityInvariant": true
+    },
+    {
+      "id": "ALG-002",
+      "operation": "register",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "ALG-003",
+      "operation": "idempotent-register",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "ALG-004",
+      "operation": "register-conflict",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "IDEMPOTENCY_CONFLICT",
+      "securityInvariant": true
+    },
+    {
+      "id": "ALG-005",
+      "operation": "unauthorized-status",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "UNAUTHORIZED",
+      "securityInvariant": true
+    },
+    {
+      "id": "ALG-006",
+      "operation": "activate",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "ALG-007",
+      "operation": "single-active-version",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "ACTIVE_VERSION_CONFLICT",
+      "securityInvariant": true
+    },
+    {
+      "id": "ALG-008",
+      "operation": "replace-active-version",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "ALG-009",
+      "operation": "retired-is-terminal",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "TERMINAL_STATE",
+      "securityInvariant": true
+    },
+    {
+      "id": "ALG-010",
+      "operation": "revoked-role-cannot-register",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "UNAUTHORIZED",
+      "securityInvariant": true
+    },
+    {
+      "id": "ALG-011",
+      "operation": "signed-bundle-release-binding",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": true
+    },
+    {
+      "id": "MIR-001",
+      "operation": "unauthorized-mirror-sync",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "UNAUTHORIZED",
+      "securityInvariant": true
+    },
+    {
+      "id": "MIR-002",
+      "operation": "mirror-active-state",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": true
+    },
+    {
+      "id": "MIR-003",
+      "operation": "mirror-stale-source-block",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "STALE_SOURCE_STATE",
+      "securityInvariant": true
+    },
+    {
+      "id": "MIR-004",
+      "operation": "mirror-same-block-conflict",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "IDEMPOTENCY_CONFLICT",
+      "securityInvariant": true
+    },
+    {
+      "id": "MIR-005",
+      "operation": "mirror-metadata-conflict",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "MIRROR_METADATA_CONFLICT",
+      "securityInvariant": true
+    },
+    {
+      "id": "MIR-006",
+      "operation": "single-active-mirror",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "ACTIVE_VERSION_CONFLICT",
+      "securityInvariant": true
+    },
+    {
+      "id": "MIR-007",
+      "operation": "expired-mirror-blocks-issue",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "ALGORITHM_NOT_ACTIVE",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-001",
+      "operation": "unauthorized-issue",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "UNAUTHORIZED",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-002",
+      "operation": "inactive-algorithm",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "ALGORITHM_NOT_ACTIVE",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-003",
+      "operation": "invalid-commitment",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "INVALID_COMMITMENT",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-004",
+      "operation": "issue",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "LBL-005",
+      "operation": "invalid-expiry",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "INVALID_EXPIRY",
+      "securityInvariant": false
+    },
+    {
+      "id": "LBL-006",
+      "operation": "idempotent-issue",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "LBL-007",
+      "operation": "label-payload-conflict",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "IDEMPOTENCY_CONFLICT",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-008",
+      "operation": "task-double-use",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "IDEMPOTENCY_CONFLICT",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-009",
+      "operation": "suspend-resume",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "LBL-010",
+      "operation": "unauthorized-lifecycle",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "UNAUTHORIZED",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-011",
+      "operation": "revoke-is-terminal",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "INVALID_TRANSITION",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-012",
+      "operation": "revocation-payload-conflict",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "IDEMPOTENCY_CONFLICT",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-013",
+      "operation": "expire-too-early",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "NOT_DUE",
+      "securityInvariant": false
+    },
+    {
+      "id": "LBL-014",
+      "operation": "expire-when-due",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "LBL-015",
+      "operation": "replace-label",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": false
+    },
+    {
+      "id": "LBL-016",
+      "operation": "replace-revoked-label",
+      "expectedOutcome": "ERROR",
+      "expectedErrorCode": "TERMINAL_STATE",
+      "securityInvariant": true
+    },
+    {
+      "id": "LBL-017",
+      "operation": "algorithm-registry-binding-readback",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": true
+    },
+    {
+      "id": "SEC-001",
+      "operation": "minimal-state-fields",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": true
+    },
+    {
+      "id": "SEC-002",
+      "operation": "minimal-event-fields",
+      "expectedOutcome": "SUCCESS",
+      "securityInvariant": true
+    }
+  ]
+}

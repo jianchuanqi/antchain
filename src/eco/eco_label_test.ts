@@ -3,9 +3,23 @@ import { createApp } from "../server.ts";
 import {
   DevHeaderViewerResolver,
   EcoLabelService,
+  LedgerAnchor,
   LocalDeterministicSandbox,
   MemoryLedgerAdapter,
 } from "./index.ts";
+
+class ConfirmingLedger extends MemoryLedgerAdapter {
+  override reconcile(anchor: LedgerAnchor): Promise<LedgerAnchor> {
+    return Promise.resolve({
+      ...anchor,
+      transactionId: "f".repeat(64),
+      network: "AntChain-test",
+      status: "CONFIRMED",
+      blockHeight: 99,
+      finalizedAt: "2026-08-11T08:00:00.000Z",
+    });
+  }
+}
 
 const algorithm = {
   id: "eco-v1",
@@ -59,8 +73,9 @@ async function issuedService(): Promise<
 Deno.test("weighted calculation creates reproducible commitments and no raw data in public view", async () => {
   const { service, labelId } = await issuedService();
   const publicView = await service.verify(labelId);
-  assertEquals(publicView.level, "A");
-  assertEquals(publicView.score, 86);
+  assert(!("level" in publicView));
+  assert(!("score" in publicView));
+  assertEquals(publicView.status, "PENDING_CHAIN");
   assert(publicView.verification.inputCommitment);
   assert(publicView.verification.evidenceHashConsistent);
   assertEquals(publicView.verification.ledgerConfirmed, false);
@@ -68,6 +83,24 @@ Deno.test("weighted calculation creates reproducible commitments and no raw data
   assert(!JSON.stringify(publicView).includes("recycledRate"));
   assert(!JSON.stringify(publicView).includes('energy":20'));
   assert(publicView.qrPayload.includes(publicView.verifyUrl));
+});
+
+Deno.test("a label is not active until the ledger receipt is final", async () => {
+  const service = new EcoLabelService(
+    new LocalDeterministicSandbox(),
+    new ConfirmingLedger(),
+  );
+  await service.registerAlgorithm(algorithm);
+  await service.setAlgorithmStatus(algorithm.id, "ACTIVE");
+  const task = await service.submitEvaluation(product, algorithm.id);
+  await service.executeTask(task.id);
+  const submitted = await service.issueLabel(task.id);
+  assertEquals(submitted.status, "PENDING_CHAIN");
+  assertEquals(submitted.issuedAt, undefined);
+  const reconciled = await service.reconcileLabelLedger(submitted.id);
+  assertEquals(reconciled.status, "ACTIVE");
+  assertEquals(reconciled.issuedAt, "2026-08-11T08:00:00.000Z");
+  assertEquals(reconciled.ledgerAnchor.status, "CONFIRMED");
 });
 
 Deno.test("enterprise data is isolated from other enterprises", async () => {
@@ -98,9 +131,10 @@ Deno.test("partner access requires an explicit enterprise scope", async () => {
   const partner = await service.getLabel(labelId, {
     role: "partner",
     authorizedEnterpriseIds: ["enterprise-a"],
-  }) as { metricResults: unknown[]; product?: unknown };
-  assertEquals(partner.metricResults.length, 2);
+  }) as { metricResults?: unknown[]; product?: unknown; score?: number };
+  assertEquals(partner.metricResults, undefined);
   assertEquals(partner.product, undefined);
+  assertEquals(partner.score, undefined);
 });
 
 Deno.test("label expiry must be a valid future time", async () => {
@@ -230,7 +264,9 @@ Deno.test("API workflow and public verification page work without AntChain or TC
     new Request(`http://test.local/verify/${labelId}`),
   );
   assertEquals(html.status, 200);
-  assert((await html.text()).includes("本地演示记录"));
+  const htmlText = await html.text();
+  assert(htmlText.includes("本地演示记录"));
+  assert(!htmlText.includes("等级 / 分数"));
 });
 
 Deno.test("list APIs are role filtered and never expose product attributes", async () => {
@@ -249,6 +285,16 @@ Deno.test("list APIs are role filtered and never expose product attributes", asy
   const taskText = await taskList.text();
   assert(!taskText.includes("recycledRate"));
   assert(!taskText.includes('"energy":20'));
+  const partnerTaskList = await fetchList("/api/eco/evaluations", {
+    "x-viewer-role": "partner",
+    "x-authorized-enterprise-ids": "enterprise-a",
+  });
+  assertEquals(partnerTaskList.status, 200);
+  const partnerTask = (await partnerTaskList.json() as {
+    data: Array<{ score?: number; level?: string }>;
+  }).data[0];
+  assertEquals(partnerTask.score, undefined);
+  assertEquals(partnerTask.level, undefined);
   const labelList = await fetchList("/api/eco/labels", enterpriseHeaders);
   assertEquals(labelList.status, 200);
   assert((await labelList.text()).includes(labelId));

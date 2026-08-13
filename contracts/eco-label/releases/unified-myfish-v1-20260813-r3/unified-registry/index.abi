@@ -1,0 +1,419 @@
+{
+  "____comment": "This file was generated with Myfish. DO NOT EDIT.",
+  "version": "mychain::abi/1.5",
+  "contract_version": 1,
+  "contract_git_id": "R2026001EDDLEcoLabelRegistryUnifiedV2",
+  "vm_type": "wasm",
+  "source_type": "AssemblyScript",
+  "compiler_version": "Myfish 1.2.0",
+  "message": "",
+  "interfaces": [
+    {
+      "name": "initialize",
+      "type": "initialize"
+    },
+    {
+      "name": "grantRole",
+      "type": "grantRole"
+    },
+    {
+      "name": "revokeRole",
+      "type": "revokeRole"
+    },
+    {
+      "name": "hasRole",
+      "type": "hasRole"
+    },
+    {
+      "name": "registerAlgorithm",
+      "type": "registerAlgorithm"
+    },
+    {
+      "name": "setAlgorithmStatus",
+      "type": "setAlgorithmStatus"
+    },
+    {
+      "name": "replaceActiveAlgorithm",
+      "type": "replaceActiveAlgorithm"
+    },
+    {
+      "name": "getAlgorithm",
+      "type": "getAlgorithm"
+    },
+    {
+      "name": "getActiveAlgorithmId",
+      "type": "getActiveAlgorithmId"
+    },
+    {
+      "name": "isAlgorithmActive",
+      "type": "isAlgorithmActive"
+    },
+    {
+      "name": "issueLabel",
+      "type": "issueLabel"
+    },
+    {
+      "name": "suspendLabel",
+      "type": "suspendLabel"
+    },
+    {
+      "name": "resumeLabel",
+      "type": "resumeLabel"
+    },
+    {
+      "name": "revokeLabel",
+      "type": "revokeLabel"
+    },
+    {
+      "name": "expireLabel",
+      "type": "expireLabel"
+    },
+    {
+      "name": "replaceLabel",
+      "type": "replaceLabel"
+    },
+    {
+      "name": "getLabel",
+      "type": "getLabel"
+    },
+    {
+      "name": "getLabelByTaskId",
+      "type": "getLabelByTaskId"
+    }
+  ],
+  "structs": [
+    {
+      "name": "initialize",
+      "fields": [],
+      "results": [
+        "void"
+      ]
+    },
+    {
+      "name": "grantRole",
+      "fields": [
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "account",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "void"
+      ]
+    },
+    {
+      "name": "revokeRole",
+      "fields": [
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "account",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "void"
+      ]
+    },
+    {
+      "name": "hasRole",
+      "fields": [
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "account",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "bool"
+      ]
+    },
+    {
+      "name": "registerAlgorithm",
+      "fields": [
+        {
+          "name": "algorithmId",
+          "type": "string"
+        },
+        {
+          "name": "schemeId",
+          "type": "string"
+        },
+        {
+          "name": "version",
+          "type": "string"
+        },
+        {
+          "name": "algorithmHash",
+          "type": "string"
+        },
+        {
+          "name": "evaluatorHash",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "setAlgorithmStatus",
+      "fields": [
+        {
+          "name": "algorithmId",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "replaceActiveAlgorithm",
+      "fields": [
+        {
+          "name": "currentAlgorithmId",
+          "type": "string"
+        },
+        {
+          "name": "replacementAlgorithmId",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "getAlgorithm",
+      "fields": [
+        {
+          "name": "algorithmId",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "getActiveAlgorithmId",
+      "fields": [
+        {
+          "name": "schemeId",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "isAlgorithmActive",
+      "fields": [
+        {
+          "name": "algorithmId",
+          "type": "string"
+        },
+        {
+          "name": "algorithmHash",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "issueLabel",
+      "fields": [
+        {
+          "name": "labelId",
+          "type": "string"
+        },
+        {
+          "name": "taskId",
+          "type": "string"
+        },
+        {
+          "name": "algorithmId",
+          "type": "string"
+        },
+        {
+          "name": "algorithmHash",
+          "type": "string"
+        },
+        {
+          "name": "inputHash",
+          "type": "string"
+        },
+        {
+          "name": "resultHash",
+          "type": "string"
+        },
+        {
+          "name": "evidenceHash",
+          "type": "string"
+        },
+        {
+          "name": "authorizationHash",
+          "type": "string"
+        },
+        {
+          "name": "proofHash",
+          "type": "string"
+        },
+        {
+          "name": "expiresAt",
+          "type": "uint64"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "suspendLabel",
+      "fields": [
+        {
+          "name": "labelId",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "resumeLabel",
+      "fields": [
+        {
+          "name": "labelId",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "revokeLabel",
+      "fields": [
+        {
+          "name": "labelId",
+          "type": "string"
+        },
+        {
+          "name": "reasonHash",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "expireLabel",
+      "fields": [
+        {
+          "name": "labelId",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "replaceLabel",
+      "fields": [
+        {
+          "name": "previousLabelId",
+          "type": "string"
+        },
+        {
+          "name": "labelId",
+          "type": "string"
+        },
+        {
+          "name": "taskId",
+          "type": "string"
+        },
+        {
+          "name": "algorithmId",
+          "type": "string"
+        },
+        {
+          "name": "algorithmHash",
+          "type": "string"
+        },
+        {
+          "name": "inputHash",
+          "type": "string"
+        },
+        {
+          "name": "resultHash",
+          "type": "string"
+        },
+        {
+          "name": "evidenceHash",
+          "type": "string"
+        },
+        {
+          "name": "authorizationHash",
+          "type": "string"
+        },
+        {
+          "name": "proofHash",
+          "type": "string"
+        },
+        {
+          "name": "expiresAt",
+          "type": "uint64"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "getLabel",
+      "fields": [
+        {
+          "name": "labelId",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    },
+    {
+      "name": "getLabelByTaskId",
+      "fields": [
+        {
+          "name": "taskId",
+          "type": "string"
+        }
+      ],
+      "results": [
+        "string"
+      ]
+    }
+  ],
+  "types": [],
+  "variants": []
+}

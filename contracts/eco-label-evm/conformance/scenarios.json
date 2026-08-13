@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "eco-design-label-evm-scenarios/v1",
+  "contract": "EcoDesignLabelRegistryV1",
+  "scenarios": [
+    {
+      "id": "EVM-001",
+      "name": "EVM artifact is pinned and deployable without sensitive rating fields",
+      "security": true
+    },
+    {
+      "id": "EVM-002",
+      "name": "active rule and label issuance are atomic in one contract",
+      "security": true
+    },
+    {
+      "id": "EVM-003",
+      "name": "unauthorized and inactive-rule issuance fail without state",
+      "security": true
+    },
+    {
+      "id": "EVM-004",
+      "name": "exact retry is idempotent and conflicting label/task reuse is rejected",
+      "security": true
+    },
+    {
+      "id": "EVM-005",
+      "name": "algorithm suspension atomically blocks subsequent issuance",
+      "security": true
+    },
+    {
+      "id": "EVM-006",
+      "name": "label lifecycle is governed and irreversible at terminal states",
+      "security": true
+    },
+    {
+      "id": "EVM-007",
+      "name": "supersede creates a new immutable label and links both records",
+      "security": false
+    },
+    {
+      "id": "EVM-008",
+      "name": "algorithm registration is idempotent but changed content conflicts",
+      "security": true
+    },
+    {
+      "id": "EVM-009",
+      "name": "activating a new rule version suspends the previous active version",
+      "security": false
+    },
+    {
+      "id": "EVM-010",
+      "name": "retired algorithms cannot be reactivated",
+      "security": true
+    },
+    {
+      "id": "EVM-011",
+      "name": "zero commitments and already-expired labels are rejected",
+      "security": true
+    },
+    {
+      "id": "EVM-012",
+      "name": "wrong algorithm commitment cannot issue under an active rule",
+      "security": true
+    },
+    {
+      "id": "EVM-013",
+      "name": "revoking a role immediately removes the associated authority",
+      "security": true
+    },
+    {
+      "id": "EVM-014",
+      "name": "unknown labels and tasks fail closed",
+      "security": false
+    },
+    {
+      "id": "EVM-015",
+      "name": "only lifecycle role can suspend, resume and revoke",
+      "security": true
+    },
+    {
+      "id": "EVM-016",
+      "name": "a label expires only after its declared chain time",
+      "security": false
+    },
+    {
+      "id": "EVM-017",
+      "name": "terminal revoked labels cannot be superseded",
+      "security": true
+    },
+    {
+      "id": "EVM-018",
+      "name": "event commitments and independent task read remain consistent",
+      "security": true
+    }
+  ]
+}

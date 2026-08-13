@@ -20,6 +20,10 @@ export interface RegisterAlgorithmInput {
   id: string;
   version: string;
   name: string;
+  /** Required by the production AntChain adapter. */
+  schemeId?: string;
+  /** Required by the production AntChain adapter. */
+  evaluatorHash?: string;
   metrics: MetricDefinition[];
 }
 
@@ -46,6 +50,7 @@ export class EcoLabelService {
       id: input.id,
       version: input.version,
       name: input.name,
+      ...(input.schemeId ? { schemeId: input.schemeId } : {}),
       metrics: input.metrics,
     });
     const algorithm: AlgorithmVersion = {
@@ -161,10 +166,10 @@ export class EcoLabelService {
     if (algorithm.status !== "ACTIVE") {
       throw new Error(`Algorithm ${algorithm.id} is not active`);
     }
-    const issuedAt = now();
+    const requestedAt = now();
     if (expiresAt) {
       const expiry = Date.parse(expiresAt);
-      if (!Number.isFinite(expiry) || expiry <= Date.parse(issuedAt)) {
+      if (!Number.isFinite(expiry) || expiry <= Date.parse(requestedAt)) {
         throw new Error(
           "expiresAt must be a valid time later than the issuance time",
         );
@@ -177,9 +182,28 @@ export class EcoLabelService {
       labelId: id,
       taskId,
       algorithmId: algorithm.id,
+      algorithmHash: task.evidence.algorithmHash,
       inputHash: task.evidence.inputHash,
       resultHash: task.evidence.resultHash,
       evidenceHash: task.evidence.evidenceHash,
+      authorizationHash: await sha256({
+        purpose: "eco-design-labelling",
+        taskId,
+        enterpriseId: task.product.enterpriseId,
+      }),
+      proofHash: await sha256({
+        evidenceHash: task.evidence.evidenceHash,
+        sandboxSignature: task.evidence.sandboxSignature,
+        attestationRef: task.evidence.attestationRef,
+      }),
+      // The legacy MVP has no DataUseGrant object. A real AntChain adapter
+      // rejects this assurance level; only the in-memory development ledger
+      // accepts it. The production coordinator must provide a verified grant.
+      authorizationAssurance: "DEVELOPMENT_SELF_ASSERTED",
+      computeAssurance: task.evidence.sandboxType === "TCS"
+        ? "VERIFIED_TCS"
+        : "LOCAL_DETERMINISTIC",
+      expiresAtEpochMs: expiresAt ? Date.parse(expiresAt) : 0,
     });
     const label: EcoLabel = {
       id,
@@ -190,11 +214,19 @@ export class EcoLabelService {
       algorithmVersion: algorithm.version,
       score: task.result.score,
       level: task.result.level,
-      status: "ACTIVE",
-      issuedAt,
+      status: ledgerAnchor.status === "CONFIRMED"
+        ? "ACTIVE"
+        : ledgerAnchor.status === "FAILED"
+        ? "CHAIN_FAILED"
+        : "PENDING_CHAIN",
+      requestedAt,
+      issuedAt: ledgerAnchor.status === "CONFIRMED" ? requestedAt : undefined,
       expiresAt,
       evidence: task.evidence,
       ledgerAnchor,
+      pendingLedgerAction: ledgerAnchor.status === "PENDING"
+        ? "ISSUE"
+        : undefined,
     };
     this.labels.set(id, label);
     return label;
@@ -204,16 +236,76 @@ export class EcoLabelService {
     if (!reason.trim()) throw new Error("A revocation reason is required");
     const label = this.requireLabel(labelId);
     if (label.status === "REVOKED") return label;
+    if (label.status === "PENDING_REVOCATION") {
+      if (label.revocationReason === reason) return label;
+      throw new Error("A different revocation is already pending");
+    }
+    if (
+      label.status === "PENDING_CHAIN" || label.status === "CHAIN_FAILED"
+    ) {
+      throw new Error("Only an issued label can be revoked");
+    }
+    const previousStatus = label.status;
     const ledgerAnchor = await this.ledger.revokeLabel(
       label.id,
       await sha256({ reason }),
     );
     const updated: EcoLabel = {
       ...label,
-      status: "REVOKED",
-      revokedAt: now(),
+      status: ledgerAnchor.status === "CONFIRMED"
+        ? "REVOKED"
+        : ledgerAnchor.status === "FAILED"
+        ? previousStatus
+        : "PENDING_REVOCATION",
+      revokedAt: ledgerAnchor.status === "CONFIRMED" ? now() : undefined,
       revocationReason: reason,
       ledgerAnchor,
+      pendingLedgerAction: ledgerAnchor.status === "PENDING"
+        ? "REVOKE"
+        : undefined,
+      statusBeforePendingLedgerAction: ledgerAnchor.status === "PENDING"
+        ? previousStatus
+        : undefined,
+    };
+    this.labels.set(labelId, updated);
+    return updated;
+  }
+
+  /**
+   * Reconciles one previously submitted ledger operation. A gateway response
+   * cannot change business status; only LedgerPort's independently verified
+   * final receipt can promote issue/revoke state.
+   */
+  async reconcileLabelLedger(labelId: string): Promise<EcoLabel> {
+    const label = this.requireLabel(labelId);
+    if (
+      label.ledgerAnchor.status !== "PENDING" ||
+      !label.pendingLedgerAction
+    ) return label;
+    const ledgerAnchor = await this.ledger.reconcile(label.ledgerAnchor);
+    if (ledgerAnchor.status === "PENDING") return label;
+    let status: LabelStatus;
+    if (ledgerAnchor.status === "CONFIRMED") {
+      status = label.pendingLedgerAction === "ISSUE" ? "ACTIVE" : "REVOKED";
+    } else if (label.pendingLedgerAction === "ISSUE") {
+      status = "CHAIN_FAILED";
+    } else {
+      status = label.statusBeforePendingLedgerAction || "ACTIVE";
+    }
+    const updated: EcoLabel = {
+      ...label,
+      status,
+      ledgerAnchor,
+      issuedAt: ledgerAnchor.status === "CONFIRMED" &&
+          label.pendingLedgerAction === "ISSUE"
+        ? ledgerAnchor.finalizedAt || now()
+        : label.issuedAt,
+      revokedAt: ledgerAnchor.status === "CONFIRMED" &&
+          label.pendingLedgerAction === "REVOKE"
+        ? ledgerAnchor.finalizedAt || now()
+        : label.revokedAt,
+      pendingLedgerAction: undefined,
+      statusBeforePendingLedgerAction: undefined,
     };
     this.labels.set(labelId, updated);
     return updated;
@@ -260,21 +352,26 @@ export class EcoLabelService {
       .filter((task) =>
         this.canViewEnterprise(viewer, task.product.enterpriseId)
       )
-      .map((task) => ({
-        id: task.id,
-        productId: task.product.productId,
-        productName: task.product.productName,
-        enterpriseId: privilegedRoles.includes(viewer.role)
-          ? task.product.enterpriseId
-          : undefined,
-        algorithmId: task.algorithmId,
-        status: task.status,
-        createdAt: task.createdAt,
-        score: task.result?.score,
-        level: task.result?.level,
-        sandboxType: task.evidence?.sandboxType,
-        evidenceHash: task.evidence?.evidenceHash,
-      }));
+      .map((task) => {
+        const canViewResult = privilegedRoles.includes(viewer.role) ||
+          (viewer.role === "enterprise" &&
+            viewer.enterpriseId === task.product.enterpriseId);
+        return {
+          id: task.id,
+          productId: task.product.productId,
+          productName: task.product.productName,
+          enterpriseId: privilegedRoles.includes(viewer.role)
+            ? task.product.enterpriseId
+            : undefined,
+          algorithmId: task.algorithmId,
+          status: task.status,
+          createdAt: task.createdAt,
+          score: canViewResult ? task.result?.score : undefined,
+          level: canViewResult ? task.result?.level : undefined,
+          sandboxType: task.evidence?.sandboxType,
+          evidenceHash: task.evidence?.evidenceHash,
+        };
+      });
   }
 
   /**
@@ -307,12 +404,7 @@ export class EcoLabelService {
     const task = this.requireTask(label.taskId);
     if (viewer.role === "public") return await this.publicView(label, task);
     this.assertCanViewEnterprise(viewer, label.enterpriseId);
-    if (viewer.role === "partner") {
-      return {
-        ...await this.publicView(label, task),
-        metricResults: task.result?.metricResults,
-      };
-    }
+    if (viewer.role === "partner") return await this.publicView(label, task);
     return { ...label, product: task.product, result: task.result };
   }
 
@@ -333,6 +425,7 @@ export class EcoLabelService {
       id: algorithm.id,
       version: algorithm.version,
       name: algorithm.name,
+      ...(algorithm.schemeId ? { schemeId: algorithm.schemeId } : {}),
       metrics: algorithm.metrics,
     });
     const expectedEvidenceHash = await sha256({
@@ -349,8 +442,6 @@ export class EcoLabelService {
       labelId: label.id,
       productName: task.product.productName,
       status: this.currentLabelStatus(label),
-      level: label.level,
-      score: label.score,
       issuedAt: label.issuedAt,
       expiresAt: label.expiresAt,
       algorithm: {
@@ -364,7 +455,16 @@ export class EcoLabelService {
         evidenceHash: label.evidence.evidenceHash,
         attestationRef: label.evidence.attestationRef,
       },
-      ledger: label.ledgerAnchor,
+      ledger: {
+        transactionId: label.ledgerAnchor.transactionId,
+        network: label.ledgerAnchor.network,
+        contract: label.ledgerAnchor.contract,
+        anchoredAt: label.ledgerAnchor.anchoredAt,
+        status: label.ledgerAnchor.status,
+        blockHeight: label.ledgerAnchor.blockHeight,
+        finalizedAt: label.ledgerAnchor.finalizedAt,
+        failureCode: label.ledgerAnchor.failureCode,
+      },
       verification: {
         inputCommitment:
           (await sha256(task.product)) === label.evidence.inputHash,

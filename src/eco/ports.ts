@@ -36,9 +36,21 @@ export interface LedgerPort {
     labelId: string;
     taskId: string;
     algorithmId: string;
+    algorithmHash: string;
     inputHash: string;
     resultHash: string;
     evidenceHash: string;
+    authorizationHash: string;
+    proofHash: string;
+    authorizationAssurance:
+      | "DEVELOPMENT_SELF_ASSERTED"
+      | "VERIFIED_DATA_USE_GRANT";
+    computeAssurance: "LOCAL_DETERMINISTIC" | "VERIFIED_TCS";
+    expiresAtEpochMs: number;
   }): Promise<LedgerAnchor>;
+  suspendLabel(labelId: string): Promise<LedgerAnchor>;
+  resumeLabel(labelId: string): Promise<LedgerAnchor>;
   revokeLabel(labelId: string, reasonHash: string): Promise<LedgerAnchor>;
+  expireLabel(labelId: string): Promise<LedgerAnchor>;
+  reconcile(anchor: LedgerAnchor): Promise<LedgerAnchor>;
 }

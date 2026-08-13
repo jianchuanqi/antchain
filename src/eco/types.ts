@@ -9,7 +9,14 @@ export type ViewerRole =
 
 export type AlgorithmStatus = "DRAFT" | "ACTIVE" | "SUSPENDED" | "RETIRED";
 export type TaskStatus = "SUBMITTED" | "RUNNING" | "COMPLETED" | "FAILED";
-export type LabelStatus = "ACTIVE" | "REVOKED" | "EXPIRED" | "SUSPENDED";
+export type LabelStatus =
+  | "PENDING_CHAIN"
+  | "ACTIVE"
+  | "PENDING_REVOCATION"
+  | "REVOKED"
+  | "EXPIRED"
+  | "SUSPENDED"
+  | "CHAIN_FAILED";
 export type MetricDirection = "HIGHER_IS_BETTER" | "LOWER_IS_BETTER";
 
 export interface MetricDefinition {
@@ -28,6 +35,10 @@ export interface AlgorithmVersion {
   id: string;
   version: string;
   name: string;
+  /** Stable identifier scheme namespace used by AlgorithmRegistry. */
+  schemeId?: string;
+  /** Signed evaluator/OCI commitment when separate from the rule hash. */
+  evaluatorHash?: string;
   metrics: MetricDefinition[];
   status: AlgorithmStatus;
   algorithmHash: string;
@@ -86,10 +97,23 @@ export interface EvaluationTask {
 
 export interface LedgerAnchor {
   transactionId: string;
+  /** Gateway request/receipt reference. It is not a transaction hash. */
+  requestId?: string;
   network: string;
   contract: "AlgorithmRegistry" | "EcoLabelRegistry";
   anchoredAt: string;
-  status: "CONFIRMED" | "PENDING";
+  status: "CONFIRMED" | "PENDING" | "FAILED";
+  blockHeight?: number;
+  finalizedAt?: string;
+  failureCode?: string;
+  failureMessage?: string;
+  /** Non-sensitive values required to independently verify a final receipt. */
+  receiptVerification?: {
+    contractName: string;
+    methodSignature: string;
+    expectedEvent: string;
+    payloadHash: string;
+  };
 }
 
 export interface EcoLabel {
@@ -102,12 +126,17 @@ export interface EcoLabel {
   score: number;
   level: string;
   status: LabelStatus;
-  issuedAt: string;
+  requestedAt: string;
+  /** Set only after a confirmed ledger receipt. */
+  issuedAt?: string;
   expiresAt?: string;
   evidence: CalculationEvidence;
   ledgerAnchor: LedgerAnchor;
   revokedAt?: string;
   revocationReason?: string;
+  /** Internal recovery state; never placed on chain. */
+  pendingLedgerAction?: "ISSUE" | "REVOKE";
+  statusBeforePendingLedgerAction?: LabelStatus;
 }
 
 export interface ViewerContext {
@@ -127,16 +156,24 @@ export interface PublicLabelView {
   labelId: string;
   productName: string;
   status: LabelStatus;
-  level: string;
-  score: number;
-  issuedAt: string;
+  issuedAt?: string;
   expiresAt?: string;
   algorithm: Pick<AlgorithmVersion, "id" | "version" | "name">;
   sandbox: Pick<
     CalculationEvidence,
     "sandboxType" | "sandboxInstanceId" | "evidenceHash" | "attestationRef"
   >;
-  ledger: LedgerAnchor;
+  ledger: Pick<
+    LedgerAnchor,
+    | "transactionId"
+    | "network"
+    | "contract"
+    | "anchoredAt"
+    | "status"
+    | "blockHeight"
+    | "finalizedAt"
+    | "failureCode"
+  >;
   verification: {
     inputCommitment: boolean;
     algorithmCommitment: boolean;

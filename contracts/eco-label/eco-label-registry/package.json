@@ -1,0 +1,13 @@
+{
+  "name": "@eddl/eco-label-registry-contract",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "myfish compile",
+    "test": "myfish test"
+  },
+  "devDependencies": {
+    "@antchain/myassembly": "1.2.0",
+    "@antchain/myfish": "1.2.1"
+  }
+}

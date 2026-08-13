@@ -6,3 +6,4 @@ export * from "./hash.ts";
 export * from "./adapters/memory.ts";
 export * from "./adapters/tcs.ts";
 export * from "./adapters/antchain.ts";
+export * from "./contracts/index.ts";

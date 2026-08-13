@@ -140,12 +140,26 @@ export class MemoryLedgerAdapter implements LedgerPort {
       labelId: string;
       taskId: string;
       algorithmId: string;
+      algorithmHash: string;
       inputHash: string;
       resultHash: string;
       evidenceHash: string;
+      authorizationHash: string;
+      proofHash: string;
+      authorizationAssurance:
+        | "DEVELOPMENT_SELF_ASSERTED"
+        | "VERIFIED_DATA_USE_GRANT";
+      computeAssurance: "LOCAL_DETERMINISTIC" | "VERIFIED_TCS";
+      expiresAtEpochMs: number;
     },
   ): Promise<LedgerAnchor> {
     return this.anchor("EcoLabelRegistry", label);
+  }
+  suspendLabel(labelId: string): Promise<LedgerAnchor> {
+    return this.anchor("EcoLabelRegistry", { labelId, action: "SUSPEND" });
+  }
+  resumeLabel(labelId: string): Promise<LedgerAnchor> {
+    return this.anchor("EcoLabelRegistry", { labelId, action: "RESUME" });
   }
   revokeLabel(labelId: string, reasonHash: string): Promise<LedgerAnchor> {
     return this.anchor("EcoLabelRegistry", {
@@ -153,6 +167,14 @@ export class MemoryLedgerAdapter implements LedgerPort {
       reasonHash,
       action: "REVOKE",
     });
+  }
+  expireLabel(labelId: string): Promise<LedgerAnchor> {
+    return this.anchor("EcoLabelRegistry", { labelId, action: "EXPIRE" });
+  }
+  reconcile(anchor: LedgerAnchor): Promise<LedgerAnchor> {
+    // A local demonstration record has no external receipt and can never be
+    // promoted to CONFIRMED.
+    return Promise.resolve({ ...anchor, status: "PENDING" });
   }
 }
 
