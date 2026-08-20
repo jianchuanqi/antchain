@@ -1,13 +1,17 @@
 # AGENTS.md — antchain
 
-## Engineering OS 权威基线
+## Engineering OS 权威与仓库上下文来源
 
 - 权威仓库：[jianchuanqi/tiangong-sscm-engineering-os](https://github.com/jianchuanqi/tiangong-sscm-engineering-os)
-- 架构版本：`architecture-v0.1.1`
-- 架构入口：[docs/architecture-entrypoint.md](https://github.com/jianchuanqi/tiangong-sscm-engineering-os/blob/architecture-v0.1.1/docs/architecture-entrypoint.md)
-- Engineering OS commit：`b666efce3e5753562d9e44de9adcd245f440cdbd`
+- 仓库上下文版本：`architecture-v0.1.1`
+- 上下文入口：[docs/architecture-entrypoint.md](https://github.com/jianchuanqi/tiangong-sscm-engineering-os/blob/architecture-v0.1.1/docs/architecture-entrypoint.md)
+- 上下文 commit：`b666efce3e5753562d9e44de9adcd245f440cdbd`
 
-上述 tag、入口和完整 commit 是本仓库任务的固定历史基线。即使存在更新的架构版本，也不得在未获对应 Issue 明确授权时改用 `main`、`latest` 或其他版本。本文件只说明本仓库规则，不复制整套 Engineering OS 文档。
+以上三项只记录本文件建立仓库角色和本地规则时采用的历史来源，不是所有未来任务的执行基线或架构版本上限。本文件只声明本仓库规则，不复制整套 Engineering OS 文档；不得静默改写这组来源记录。
+
+## 任务架构基线
+
+每个 SSCM Issue 必须在正文中同时固定不可移动的架构 tag、该 tag 下的入口链接和解引用后的完整 commit。执行和复核以当前 Issue 的这组 Task architecture baseline 为准；经 Issue 明确批准、三项一致且未被弃用的其他版本（包括 `architecture-v0.1.2`）可以使用。不得用 `main`、`latest`、`current version` 或其他可移动引用代替；任务基线缺失、三项不一致、未经记录升级，或与仓库边界冲突时必须停止并请求裁决。
 
 ## 仓库角色
 
@@ -48,7 +52,7 @@
 3. 若修改 `web/`，还要读取 `web/AGENTS.md` 和 `web/package.json`；子目录规则与根规则同时适用，冲突时采用更严格者。
 4. 通过 `git status`、默认分支和远程信息确认工作区、目标仓库与变更范围。
 
-开始任何跨仓 Issue 前，还必须在上述固定版本或完整 commit 下依次读取：
+开始任何跨仓 Issue 前，还必须在当前 Issue 固定的 tag 或完整 commit 下依次读取：
 
 1. `docs/architecture-entrypoint.md`
 2. `docs/system-context.md`
@@ -63,7 +67,7 @@
 
 遇到以下任一情况，立即停止受影响工作，记录事实并请求仓库或 Engineering OS owner 裁决，不得猜测：
 
-- 固定架构 tag、入口或 commit 无法访问，三者不一致，或本地事实与固定基线冲突。
+- 当前 Issue 固定的架构 tag、入口或 commit 无法访问，三者不一致，或本地事实与其 Task architecture baseline 冲突。
 - 请求会改变本仓 Trust Infrastructure 角色，或把独立平台、Connector Plugin、DSH Runtime、Shared Contracts、TIDAS-Link 的责任混入本仓。
 - 一项成果需要修改多个仓库，但没有 Engineering OS 父 Issue 和逐仓实现/验收 Issue；不得直接修改其他仓库。
 - 代码或数据迁移的来源 commit、文件清单、许可、归属或清理要求不清楚。
