@@ -1,17 +1,16 @@
 # AGENTS.md — antchain
 
-## Engineering OS 权威与架构基线
+## Engineering OS 权威与架构版本选择
 
 - 权威仓库：[jianchuanqi/tiangong-sscm-engineering-os](https://github.com/jianchuanqi/tiangong-sscm-engineering-os)
-- 架构版本：`architecture-v1.0.0`
-- 架构入口：[architecture-v1.0.0/docs/architecture-entrypoint.md](https://github.com/jianchuanqi/tiangong-sscm-engineering-os/blob/architecture-v1.0.0/docs/architecture-entrypoint.md)
-- Engineering OS commit：`52ed316ade870ea88878ee3128ac45dae564f86b`
+- 版本选择规则：每次开始任务、恢复开放任务或核对基线时，都必须重新读取权威仓库已发布且不可移动、名称符合 `architecture-v<MAJOR>.<MINOR>.<PATCH>` 的标签，按 MAJOR、MINOR、PATCH 数值比较并选择版本号最高者。本文件不得写死某个当前版本、入口或 commit。
+- 任务解析结果：选择最高标签后，当前 Issue 必须同时固定该具体标签、该标签下的 `docs/architecture-entrypoint.md` permalink，以及标签解引用后的完整 Engineering OS commit。
 
-以上 tag、入口和完整 commit 是当前最高已发布的不可移动架构基线。新任务和全部开放任务必须与它同步；发布更高版本后继续同步，已完成任务保留原基线用于历史审计。不得用 `main`、`latest`、`current version` 或更低版本代替。本文件只声明本仓库规则，不复制整套 Engineering OS 文档。
+禁止用 `main`、`latest`、“当前版本”、标签发布日期、字符串排序结果、较低版本或其他可移动引用代替上述解析。发布更高版本后，所有开放任务必须先重新解析并升级，已完成任务保留原基线用于历史审计。本文件只声明本仓库规则，不复制整套 Engineering OS 文档。
 
 ## 任务架构基线
 
-每个 SSCM Issue 必须在正文中同时固定版本号最高的已发布不可移动架构 tag、该 tag 下的入口链接和解引用后的完整 commit。新版本发布后，所有开放任务必须同步升级并重新核对；已完成任务保留原始基线用于历史审计。任务基线缺失、不是最高已发布版本、三项不一致，或与仓库边界冲突时必须停止并请求裁决。
+每个 SSCM Issue 必须按上述规则解析并在正文中固定当时版本号最高的已发布不可移动架构 tag、同标签入口和解引用后的完整 commit。任务开始和每次恢复开放任务时都要重新验证；若已发布更高版本，必须先升级基线并重新核对。已完成任务保留原始基线用于历史审计。无法确定最高版本、任务基线缺失、不是最高已发布版本、三项不一致，或与仓库边界冲突时必须停止并请求裁决。
 
 ## 仓库角色
 
